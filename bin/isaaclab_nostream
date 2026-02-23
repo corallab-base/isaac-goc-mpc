@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+: "${ISAACLAB_DIR:?ISAACLAB_DIR is not set. (cd into project so .envrc loads)}"
+env -u LIVESTREAM -u ENABLE_CAMERAS -u PUBLIC_IP \
+  "$ISAACLAB_DIR/isaaclab.sh" "$@"
