@@ -3,6 +3,7 @@ from isaaclab.app import AppLauncher
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--robot", default="ur5e", help="Robot to visualize")
     AppLauncher.add_app_launcher_args(parser)
     args = parser.parse_args()
 
@@ -15,20 +16,37 @@ def main():
     from isaaclab.utils import configclass
 
     from isaac_goc_mpc.ur5e.ur5e_robotiq_2f85 import UR5e_ROBOTIQ_2F_85_CFG 
+    from isaac_goc_mpc.b1.b1 import UNITREE_B1_CFG
 
+    robot_cfgs = {
+        "ur5e": UR5e_ROBOTIQ_2F_85_CFG,
+        "b1": UNITREE_B1_CFG,
+    }
+
+    assert args.robot in robot_cfgs, f"{args.robot} is not supported"
+    robot_cfg = robot_cfgs[args.robot]
 
     @configclass
     class SceneCfg(InteractiveSceneCfg):
         # ground + light must be AssetBaseCfg
-        ground = AssetBaseCfg(prim_path="/World/defaultGroundPlane", spawn=sim_utils.GroundPlaneCfg())
+        ground = AssetBaseCfg(prim_path="/World/defaultGroundPlane", spawn=sim_utils.GroundPlaneCfg(
+            physics_material=sim_utils.RigidBodyMaterialCfg(
+                static_friction=1.0,
+                dynamic_friction=1.0,
+                restitution=0.0,
+            ),
+        ))
         dome_light = AssetBaseCfg(
             prim_path="/World/Light",
             spawn=sim_utils.DomeLightCfg(intensity=3000.0, color=(0.75, 0.75, 0.75)),
         )
 
-        robot: ArticulationCfg = UR5e_ROBOTIQ_2F_85_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        robot: ArticulationCfg = robot_cfg.replace(prim_path="{ENV_REGEX_NS}/Robot")
 
-    sim = SimulationContext(sim_utils.SimulationCfg(dt=0.01, device=args.device))
+    sim = SimulationContext(sim_utils.SimulationCfg(
+        dt=0.002,  # keep small if possible
+        device=args.device
+    ))
     sim.set_camera_view([2.0, 0.0, 1.5], [0.0, 0.0, 0.5])
     scene = InteractiveScene(SceneCfg(num_envs=1, env_spacing=2.0))
 
