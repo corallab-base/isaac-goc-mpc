@@ -92,3 +92,54 @@ UNITREE_B1_CFG = UnitreeArticulationCfg(
         "RL_hip_joint", "RL_thigh_joint", "RL_calf_joint"
     ],
 )
+
+"""Configuration of Unitree B1 with Z1 arm."""
+
+UNITREE_B1_WITH_Z1_CFG = UNITREE_B1_CFG.copy()
+UNITREE_B1_WITH_Z1_CFG.spawn.usd_path=str(files(isaac_goc_mpc) / "b1" / "b1_with_z1.usd")
+UNITREE_B1_WITH_Z1_CFG.init_state.joint_pos={
+    ".*R_hip_joint": -0.1,
+    ".*L_hip_joint": 0.1,
+    "F[L,R]_thigh_joint": 0.8,
+    "R[L,R]_thigh_joint": 1.0,
+    ".*_calf_joint": -1.5,
+    "joint.*": 0.0,
+    "z1_jaw_joint": 0.0
+}
+UNITREE_B1_WITH_Z1_CFG.actuators={
+    "M107-24-2": IdealPDActuatorCfg(
+        joint_names_expr=[".*_hip_.*", ".*_thigh_.*"],
+        effort_limit=200,
+        velocity_limit=23,
+        stiffness=160.0,
+        damping=5.0,
+        friction=0.01,
+        armature=0.01,
+    ),
+    "2": IdealPDActuatorCfg(
+        joint_names_expr=[".*_calf_.*"],
+        effort_limit=320,
+        velocity_limit=14,
+        stiffness=160.0,
+        damping=5.0,
+        friction=0.01,
+        armature=0.01,
+    ),
+    "z1_motors": IdealPDActuatorCfg(
+        joint_names_expr=["joint.*", "z1_jaw_joint"],
+        effort_limit=320,
+        velocity_limit=14,
+        stiffness=160.0,
+        damping=5.0,
+        friction=0.01,
+        armature=0.01,
+    ),
+}
+UNITREE_B1_WITH_Z1_CFG.joint_sdk_names=[
+    "FR_hip_joint", "FR_thigh_joint", "FR_calf_joint",
+    "FL_hip_joint", "FL_thigh_joint", "FL_calf_joint",
+    "RR_hip_joint", "RR_thigh_joint", "RR_calf_joint",
+    "RL_hip_joint", "RL_thigh_joint", "RL_calf_joint",
+    "joint1", "joint2", "joint3", "joint4", "joint5", "joint6",
+    "z1_jaw_joint",
+]
