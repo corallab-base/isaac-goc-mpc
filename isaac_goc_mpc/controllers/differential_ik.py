@@ -22,11 +22,11 @@ class CartesianVelocityController:
         Computes joint velocities using Damped Least Squares.
 
         Args:
-            v_desired: Target EE velocity [6,] (linear + angular)
-            jacobian: The EE Jacobian [6, num_joints]
+            v_desired: Target EE velocity [N, 6]  (linear + angular)
+            jacobian:  The EE Jacobian    [N, 6, num_joints]
 
         Returns:
-            Joint velocities [num_joints,]
+            Joint velocities [N, num_joints]
         """
         # J * J^T
         jj_t = torch.matmul(jacobian, jacobian.transpose(1, 2))
@@ -36,8 +36,9 @@ class CartesianVelocityController:
 
         # Solve: dot_q = J^T * inv(J*J^T + lambda^2*I) * v_desired
         # Using linalg.solve is faster and more stable than explicit inverse
-        inv_term = torch.linalg.solve(jj_t + damping_term, v_desired)
+        v_col = v_desired.unsqueeze(-1)
+        inv_term = torch.linalg.solve(jj_t + damping_term, v_col)
 
-        q_dot = torch.matmul(jacobian.transpose(0, 1), inv_term).squeeze(-1)
+        q_dot = torch.matmul(jacobian.transpose(1, 2), inv_term).squeeze(-1)
 
         return q_dot
