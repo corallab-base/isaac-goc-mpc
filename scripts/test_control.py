@@ -4,7 +4,7 @@ import time
 
 from isaaclab.app import AppLauncher
 
-def move_ee:
+def move_ee():
     env = SimpleDrakeGym(["free_body_0"], [], meshcat=None)
 
     state_lower_bound = -10.0

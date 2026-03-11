@@ -15,8 +15,8 @@ from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR, ISAACLAB_NUCLEUS_DIR
 
 from importlib.resources import files
 
-# from coral_bench import robots
-import os
+# from isaac_goc_mpc.actuators.actuator_vel_pd import IdealVelocityPDActuatorCfg
+import isaac_goc_mpc
 
 ##
 # Configuration
@@ -24,7 +24,8 @@ import os
 
 UR5e_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path=os.environ["UR5E_GRIPPER_USD"],
+        usd_path=str(files(isaac_goc_mpc) / "ur5e" / "ur5e_robotiq_2f85.usd"),
+        variants={"Gripper": "None"},
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=True,
             max_depenetration_velocity=5.0,
@@ -36,12 +37,12 @@ UR5e_CFG = ArticulationCfg(
     ),
     init_state=ArticulationCfg.InitialStateCfg(
         joint_pos={
-            "shoulder_pan_joint": 3.141592653589793,
-            "shoulder_lift_joint": -1.5707963267948966,
-            "elbow_joint": 1.5707963267948966,
-            "wrist_1_joint": -1.5707963267948966,
-            "wrist_2_joint": -1.5707963267948966,
-            "wrist_3_joint": 0.0,
+            "shoulder_pan_joint": 0.0000,
+            "shoulder_lift_joint": -2.2000,
+            "elbow_joint": 1.9000,
+            "wrist_1_joint": -1.3830,
+            "wrist_2_joint": -1.5700,
+            "wrist_3_joint": 0.0000,
         },
         pos=(0.0, 0.0, 0.0),
         rot=(1.0, 0.0, 0.0, 0.0),
@@ -70,7 +71,87 @@ UR5e_CFG = ArticulationCfg(
             armature=0.0,
         ),
     },
+    articulation_root_prim_path="/root_joint",
 )
+
+"""Configuration of UR5e arm with zero stiffness for velocity control."""
+
+UR5e_VELOCITY_CONTROL_CFG = UR5e_CFG.copy()
+UR5e_VELOCITY_CONTROL_CFG.actuators={
+    "shoulder": ImplicitActuatorCfg(
+        joint_names_expr=["shoulder_.*"],
+        stiffness=0.0, # 1320.0,
+        damping=72.6636085,
+        friction=0.0,
+        armature=0.0,
+    ),
+    "elbow": ImplicitActuatorCfg(
+        joint_names_expr=["elbow_joint"],
+        stiffness=0.0, # 600.0,
+        damping=34.64101615,
+        friction=0.0,
+        armature=0.0,
+    ),
+    "wrist": ImplicitActuatorCfg(
+        joint_names_expr=["wrist_.*"],
+        stiffness=0.0, # 216.0,
+        damping=29.39387691,
+        friction=0.0,
+        armature=0.0,
+    ),
+}
+
+"""Configuration of UR5e arm with zero stiffness and dampening for direct effort control."""
+
+UR5e_DIRECT_CONTROL_CFG = UR5e_CFG.copy()
+UR5e_DIRECT_CONTROL_CFG.actuators={
+    "shoulder": ImplicitActuatorCfg(
+        joint_names_expr=["shoulder_.*"],
+        stiffness=0.0,
+        damping=0.0,
+        friction=0.0,
+        armature=0.0,
+    ),
+    "elbow": ImplicitActuatorCfg(
+        joint_names_expr=["elbow_joint"],
+        stiffness=0.0,
+        damping=0.0,
+        friction=0.0,
+        armature=0.0,
+    ),
+    "wrist": ImplicitActuatorCfg(
+        joint_names_expr=["wrist_.*"],
+        stiffness=0.0,
+        damping=0.0,
+        friction=0.0,
+        armature=0.0,
+    ),
+}
+
+
+# UR5e_VELOCITY_CONTROL_CFG.actuators={
+#     "shoulder": IdealVelocityPDActuatorCfg(
+#         joint_names_expr=["shoulder_.*"],
+#         stiffness=0.0, # 1320.0,
+#         damping=72.6636085,
+#         friction=0.0,
+#         armature=0.0,
+#     ),
+#     "elbow": IdealVelocityPDActuatorCfg(
+#         joint_names_expr=["elbow_joint"],
+#         stiffness=0.0, # 600.0,
+#         damping=34.64101615,
+#         friction=0.0,
+#         armature=0.0,
+#     ),
+#     "wrist": IdealVelocityPDActuatorCfg(
+#         joint_names_expr=["wrist_.*"],
+#         stiffness=0.0, # 216.0,
+#         damping=29.39387691,
+#         friction=0.0,
+#         armature=0.0,
+#     ),
+# }
 
 """Configuration of UR5e arm with Robotiq_2f_85 gripper."""
 
@@ -112,4 +193,3 @@ UR5e_ROBOTIQ_2F_85_CFG.actuators["gripper_passive"] = ImplicitActuatorCfg(
     friction=0.0,
     armature=0.0,
 )
-UR5e_ROBOTIQ_2F_85_CFG.articulation_root_prim_path = "/root_joint"

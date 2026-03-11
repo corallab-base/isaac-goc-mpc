@@ -3,7 +3,7 @@ from isaaclab.app import AppLauncher
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--robot", default="ur5e", help="Robot to visualize")
+    parser.add_argument("--robot", default="b1", help="Robot to visualize")
     AppLauncher.add_app_launcher_args(parser)
     args = parser.parse_args()
 
@@ -15,12 +15,16 @@ def main():
     from isaaclab.sim import SimulationContext
     from isaaclab.utils import configclass
 
-    from isaac_goc_mpc.ur5e.ur5e_robotiq_2f85 import UR5e_ROBOTIQ_2F_85_CFG 
-    from isaac_goc_mpc.b1.b1 import UNITREE_B1_CFG
+    from isaac_goc_mpc.ur5e.ur5e_robotiq_2f85 import UR5e_CFG, UR5e_ROBOTIQ_2F_85_CFG
+    from isaac_goc_mpc.b1.b1 import UNITREE_B1_CFG, UNITREE_B1_WITH_Z1_CFG
+    from isaac_goc_mpc.g1.g1 import UNITREE_G1_29DOF_CFG
 
     robot_cfgs = {
-        "ur5e": UR5e_ROBOTIQ_2F_85_CFG,
+        "ur5e": UR5e_CFG,
+        "ur5e_robotiq_2f_85": UR5e_ROBOTIQ_2F_85_CFG,
         "b1": UNITREE_B1_CFG,
+        "b1_with_z1": UNITREE_B1_WITH_Z1_CFG,
+        "g1": UNITREE_G1_29DOF_CFG,
     }
 
     assert args.robot in robot_cfgs, f"{args.robot} is not supported"
