@@ -110,3 +110,11 @@ class G1LocomotionController:
 
         self.last_action = target_joint_pos
         return target_joint_pos
+
+    def inference(self, obs):
+        policy_input = self.actor_critic.actor_obs_normalizer(obs)
+        if self.actor_critic.state_dependent_std:
+            actions = self.actor_critic.actor(policy_input)[..., 0, :]
+        else:
+            actions = self.actor_critic.actor(policy_input)
+        return actions
